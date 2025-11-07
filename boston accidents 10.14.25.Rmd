@@ -1,0 +1,124 @@
+---
+title: "boston accidents 10.14.25"
+author: "Mary Witt"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r}
+library(readxl)
+library(janitor)
+library(lubridate)
+library(hms)
+library(writexl)
+accidents <- read_excel("C:/Users/Mary Witt/Downloads/senior project/boston accidents 10.14.25.xlsx")
+accidents <- clean_names(accidents)
+#View(accidents)
+```
+```{r}
+colnames(accidents)
+unique(accidents$distance_and_direction_from_intersection)
+#View(accidents)
+```
+
+```{r}
+accidents$trafficway_description[is.na(accidents$trafficway_description) | accidents$trafficway_description == "Not reported" | accidents$trafficway_description == "Reported but invalid"] <- "Unknown"
+
+accidents$roadway_junction_type[is.na(accidents$roadway_junction_type) | accidents$roadway_junction_type == "Not reported" | accidents$roadway_junction_type == "Reported but invalid"] <- "Unknown"
+
+accidents$light_conditions[is.na(accidents$light_conditions) | accidents$light_conditions == "Unknown" | accidents$light_conditions == "Other"] <- "Unknown/Other"
+
+accidents$crash_severity[accidents$crash_severity == "Not Reported" | is.na(accidents$crash_severity)] <- "Unknown"
+
+accidents$city_town_name[accidents$city_town_name == "CRASH" | accidents$city_town_name == "Basic" | accidents$city_town_name == "If you conducted an Advanced Query your SQL statement will be listed here" | is.na(accidents$city_town_name)] <- "Unknown"
+
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "High density business/commercial center (excluding CBD)" | accidents$urban_location_type_linked_rd == "Central Business District (CBD)"] <- "High Density Commerical Area"
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "Other urban area, including undeveloped land"]  <- "Other Urban Area"
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "Low density commerical"] <- "Low Density Commercial Area"
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "High density residential (5,000 or more persons per square mile)" ] <- "High Density Residential Area"
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "Low density residential (less than 5,000 persons per square mile)" ] <- "Low Density Residential Area"
+accidents$urban_location_type_linked_rd[accidents$urban_location_type_linked_rd == "Not applicable (i.e., not a principal arterial nor in an urbanized area)" | is.na(accidents$urban_location_type_linked_rd)] <- "Other/Unknown"
+
+
+accidents$speed_limit[accidents$speed_limit < 14 |
+                      accidents$speed_limit > 65 |
+                      is.na(accidents$speed_limit)] <- NA
+
+accidents$traffic_control_device_type[
+  is.na(accidents$traffic_control_device_type) | 
+  accidents$traffic_control_device_type == "Not reported" |
+  accidents$traffic_control_device_type == "Reported but invalid"
+] <- "Unknown"
+
+accidents$traffic_control_device_type[
+  is.na(accidents$traffic_control_device_type) | 
+  accidents$traffic_control_device_type == "Not reported" 
+] <- "Unknown"
+
+accidents$weather_new <- NA  # start blank
+
+# Specific weather first
+accidents$weather_new[grepl("Snow", accidents$weather_conditions, ignore.case = TRUE)] <- "Snow"
+accidents$weather_new[grepl("Clear", accidents$weather_conditions, ignore.case = TRUE)] <- "Clear"
+accidents$weather_new[grepl("Cloudy", accidents$weather_conditions, ignore.case = TRUE)] <- "Cloudy"
+accidents$weather_new[grepl("Sleet", accidents$weather_conditions, ignore.case = TRUE)] <- "Sleet"
+
+# Everything unknown or missing last
+accidents$weather_new[grepl("Unknown", accidents$weather_conditions, ignore.case = TRUE) |
+                      is.na(accidents$weather_conditions)] <- "Unknown"
+View(accidents)
+```
+
+
+
+
+```{r}
+# generating the new excel file to upload to felt
+write_xlsx(accidents, "C:/Users/Mary Witt/Documents/boston_accidents_clean.xlsx")
+```
+
+
+
+
+
+
+
+Additional graphs/visuals below:
+```{r}
+##plot(accidents$crash_year)
+year_counts <- table(accidents$crash_year)
+plot(year_counts,
+     type = "b",                # "b" = both points and lines
+     col = "blue",              # color of the line/points
+     pch = 19,                  # solid circle points
+     xlab = "Year",             # label for x-axis
+     ylab = "Number of Accidents", # label for y-axis
+     main = "Number of Accidents per Year")
+
+library(ggplot2)
+
+ggplot(accidents, aes(x = crash_year)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Number of Accidents per Year",
+       x = "Year",
+       y = "Number of Accidents") +
+  theme_minimal()
+```
+```{r}
+accidents$crash_time <- as.POSIXct(accidents$crash_time,
+                                   format = "%I:%M %p")
+library(hms)
+
+accidents$crash_time <- as_hms(format(accidents$crash_time, "%H:%M:%S"))
+View(accidents)
+```
+
+```{r}
+hist(as.numeric(accidents$crash_time) / 3600,
+     breaks = 24,                           # one bin per hour
+     col = "skyblue",
+     xlab = "Hour of Day",
+     ylab = "Number of Crashes",
+     main = "Crashes by Time of Day")
+```
+

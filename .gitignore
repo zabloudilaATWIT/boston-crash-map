@@ -1,0 +1,19 @@
+# Python venv and dependencies
+venv/
+**/venv/
+env/
+**/env/
+
+# Secret API keys
+.env
+
+# Python compiled files
+__pycache__/
+*.pyc
+
+# VS Code project settings
+.vscode/
+
+# System / cache files
+.DS_Store
+Thumbs.db

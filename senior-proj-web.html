@@ -1,171 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Senior Project - Interactive Map</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senior Project - Interactive Map</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 30px;
+      color: #333;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+    header {
+      text-align: center; color: white; margin-bottom: 30px;
+      animation: fadeIn 0.8s ease-in;
+    }
+    h1 {
+      font-size: 2.6em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .subtitle { font-size: 1.2em; opacity: 0.9; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .map-container {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.8s ease-out;
+    }
+    .map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 75vh;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .map-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            animation: fadeIn 0.8s ease-in;
-        }
+    .info-section {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    .info-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 1s ease-in;
+    }
+    .info-card h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+    .info-card p {
+      color: #555;
+      line-height: 1.6;
+    }
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+    /* Simple styles for the chat area */
+    #question-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      font-family: inherit;
+    }
+    #ask-button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    #ask-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    #answer-box {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f5f5ff;
+      font-size: 0.95em;
+      white-space: pre-wrap;
+    }
 
-        .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes slideUp { from {transform:translateY(30px);opacity:0;} to {transform:translateY(0);opacity:1;} }
 
-        .map-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.8s ease-out;
-        }
-
-        .map-wrapper {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .map-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .info-section {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .info-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            animation: fadeIn 1s ease-in;
-        }
-
-        .info-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .info-card p {
-            color: #555;
-            line-height: 1.6;
-        }
-
-        .placeholder-text {
-            text-align: center;
-            color: #999;
-            padding: 50px;
-            font-style: italic;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .map-wrapper {
-                height: 400px;
-            }
-
-            .info-section {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .map-wrapper { height: 60vh; }
+      .info-section { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>Senior Project</h1>
-            <p class="subtitle">Interactive Mapping Analysis</p>
-        </header>
+  <div class="container">
+    <header>
+      <h1>Senior Project</h1>
+      <p class="subtitle">Interactive Mapping Analysis</p>
+    </header>
 
-        <div class="map-container">
-            <div class="map-wrapper">
-                <!-- Replace w Felt map embed code -->
-                
-                <div class="placeholder-text">
-                    <h2>Insert Your Felt Map Here</h2>
-                    <p>Go to your Felt map → Click "Share" → Select "Embed" → Paste the iframe code here</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="info-section">
-            <div class="info-card">
-                <h3>Project Overview</h3>
-                <p>This interactive map demonstrates our research findings and geographical analysis for our senior project.</p>
-            </div>
-
-            <div class="info-card">
-                <h3>Key Features</h3>
-                <p>Explore different layers, markers, and data visualizations directly on the embedded Felt map.</p>
-            </div>
-
-            <div class="info-card">
-                <h3>How to Use</h3>
-                <p>Click and drag to pan, scroll to zoom, and click on markers to view detailed information about each location.</p>
-            </div>
-        </div>
+    <div class="map-container">
+      <div class="map-wrapper">
+        <iframe
+          src="https://felt.com/embed/map/10-25-25-MOJjU1dvTNiyDqxH7w9BkPA?loc=42.3018%2C-71.0742%2C11.13z&legend=1&cooperativeGestures=1&link=1&geolocation=0&zoomControls=1&scaleBar=1"
+          title="Felt Map"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+          loading="lazy">
+        </iframe>
+      </div>
     </div>
+
+    <div class="info-section">
+      <div class="info-card">
+        <h3>Project Overview</h3>
+        <p>
+          This interactive map demonstrates our research findings and geographical
+          analysis for our senior project.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3>Key Features</h3>
+        <p>
+          Explore different layers, markers, and data visualizations directly on the embedded Felt map.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3>How to Use</h3>
+        <p>
+          Click and drag to pan, scroll to zoom, and click on markers to view detailed
+          information about each location.
+        </p>
+      </div>
+
+      <!-- Crash Q&A card -->
+      <div class="info-card">
+        <h3>Ask About Crashes in an Area</h3>
+        <p style="margin-bottom: 10px;">
+          Type any question you have about crashes in a street, neighborhood, or area.
+          For example: “Are there many crashes near Fenway?” or
+          “Which intersections on Mass Ave are the riskiest?”
+        </p>
+        <textarea
+          id="question-input"
+          placeholder="Ask a question about crashes in a neighborhood, street, or area..."
+        ></textarea>
+        <button id="ask-button">Ask the Assistant</button>
+        <div id="answer-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS to call your FastAPI /chat endpoint -->
+  <script>
+    const askButton = document.getElementById('ask-button');
+    const questionInput = document.getElementById('question-input');
+    const answerBox = document.getElementById('answer-box');
+
+    async function sendQuestion() {
+      const message = questionInput.value.trim();
+      if (!message) return;
+
+      answerBox.style.display = 'block';
+      answerBox.textContent = 'Analyzing crash data...';
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          answerBox.textContent =
+            'Error from server: ' + (err.detail || response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        answerBox.textContent = data.answer || 'No response from server.';
+      } catch (err) {
+        console.error(err);
+        answerBox.textContent = 'Error contacting the crash assistant.';
+      }
+    }
+
+    askButton.addEventListener('click', sendQuestion);
+
+    // Ctrl+Enter or Shift+Enter to send from textarea
+    questionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
+        e.preventDefault();
+        sendQuestion();
+      }
+    });
+  </script>
 </body>
 </html>

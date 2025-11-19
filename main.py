@@ -17,7 +17,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise RuntimeError("OPENAI_API_KEY not found in environmental variables")
 
-
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 DATA_PATH = Path(__file__).resolve().parent / "Crashes.csv"

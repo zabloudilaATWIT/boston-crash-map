@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -14,21 +13,14 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 HTML_PATH = BASE_DIR / "senior-proj-web.html" 
 
-
-dotenv_path = Path(__file__).resolve().parent / ".env"
-load_dotenv(dotenv_path)
-
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY not set in .env")
+    raise RuntimeError("OPENAI_API_KEY not found in environmental variables")
 
-print("Using API key prefix:", OPENAI_API_KEY[:10])  # for debugging
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 DATA_PATH = Path(__file__).resolve().parent / "Crashes.csv"
-print("Looking for CSV here:", DATA_PATH)
-print("CSV exists:", DATA_PATH.exists())
 
 
 try:
@@ -39,6 +31,10 @@ except Exception as e:
     crashes_df = None
 
 app = FastAPI()
+@app.get("/")
+async def serve_frontend():
+    return FileResponse(HTML_PATH)
+
 
 app.add_middleware(
     CORSMiddleware,

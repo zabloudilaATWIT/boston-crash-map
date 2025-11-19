@@ -8,6 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
 
+from fastapi.responses import FileResponse
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+HTML_PATH = BASE_DIR / "senior-proj-web.html" 
+
+
 dotenv_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path)
 

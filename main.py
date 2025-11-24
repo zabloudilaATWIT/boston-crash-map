@@ -19,7 +19,7 @@ if not OPENAI_API_KEY:
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-DATA_PATH = Path(__file__).resolve().parent / "Crashes.csv"
+DATA_PATH = Path(__file__).resolve().parent / "crashes-w-landmarks.csv"
 
 
 try:

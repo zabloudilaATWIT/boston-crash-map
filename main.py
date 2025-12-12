@@ -80,7 +80,7 @@ def build_context_from_data(question: str) -> str:
     The result is a plain-text summary to prepend to the model as context.
     """
 
-    MAX_CONTEXT_CHARS = 3500  # allow a lot of info but still keep it reasonable
+    MAX_CONTEXT_CHARS = 3500 
 
     global crashes_df
     if crashes_df is None:
@@ -354,7 +354,6 @@ def build_context_from_data(question: str) -> str:
                     "Highest crash intersections: " + "; ".join(inter_lines)
                 )
 
-    # Global landmark summary
     if "nearest_landmark" in df.columns:
         lm_counts = df["nearest_landmark"].dropna().value_counts().head(5)
         if not lm_counts.empty:

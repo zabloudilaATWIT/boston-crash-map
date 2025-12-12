@@ -175,7 +175,6 @@
     </div>
   </div>
 
-  <!-- JS to call your FastAPI /chat endpoint -->
   <script>
     const askButton = document.getElementById('ask-button');
     const questionInput = document.getElementById('question-input');
@@ -212,7 +211,6 @@
 
     askButton.addEventListener('click', sendQuestion);
 
-    // Ctrl+Enter or Shift+Enter to send from textarea
     questionInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
         e.preventDefault();

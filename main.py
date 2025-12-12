@@ -92,9 +92,9 @@ def build_context_from_data(question: str) -> str:
     df = crashes_df.copy()
     parts: list[str] = []
 
-    # ------------------------------------------------------------------
-    # 1) BASIC DATASET SIZE + DATE RANGE
-    # ------------------------------------------------------------------
+    
+    # 1 BASIC DATASET SIZE + DATE RANGE
+    
     parts.append(f"Dataset size: {len(df)} crashes.")
 
     if "crash_date" in df.columns:
@@ -110,16 +110,14 @@ def build_context_from_data(question: str) -> str:
         except Exception:
             pass
 
-    # ------------------------------------------------------------------
-    # 2) CRASHES BY YEAR + SIMPLE TREND
-    # ------------------------------------------------------------------
+    # 2 CRASHES BY YEAR + SIMPLE TREND
+    
     if "crash_year" in df.columns:
         by_year = df["crash_year"].value_counts(dropna=True).sort_index()
         if not by_year.empty:
             year_lines = [f"{int(y)}: {c}" for y, c in by_year.items()]
             parts.append("Crashes per year (first few): " + "; ".join(year_lines[:6]))
 
-            # simple trend
             if len(by_year) >= 2:
                 first_year = int(by_year.index[0])
                 last_year = int(by_year.index[-1])
@@ -135,9 +133,8 @@ def build_context_from_data(question: str) -> str:
                     f"from {first_year} to {last_year}."
                 )
 
-    # ------------------------------------------------------------------
-    # 3) CITY/TOWN SUMMARY
-    # ------------------------------------------------------------------
+    # 3 CITY/TOWN SUMMARY
+
     if "city_town_name" in df.columns:
         by_city = df["city_town_name"].value_counts(dropna=True)
         if not by_city.empty:
@@ -145,9 +142,9 @@ def build_context_from_data(question: str) -> str:
             city_lines = [f"{name}: {cnt}" for name, cnt in top_cities.items()]
             parts.append("Top cities/towns by crash count: " + "; ".join(city_lines))
 
-    # ------------------------------------------------------------------
-    # 4) CRASH SEVERITY & STATUS
-    # ------------------------------------------------------------------
+
+    # 4 CRASH SEVERITY & STATUS
+    
     if "crash_severity" in df.columns:
         sev_counts = df["crash_severity"].value_counts(dropna=True).head(5)
         if not sev_counts.empty:
@@ -163,9 +160,9 @@ def build_context_from_data(question: str) -> str:
             status_lines = [f"{s}: {c}" for s, c in status_counts.items()]
             parts.append("Crash status counts: " + "; ".join(status_lines))
 
-    # ------------------------------------------------------------------
-    # 5) VEHICLES & SPEED LIMITS
-    # ------------------------------------------------------------------
+
+    # 5 VEHICLES & SPEED LIMITS
+
     if "number_of_vehicles" in df.columns:
         try:
             num_veh = pd.to_numeric(
@@ -204,9 +201,9 @@ def build_context_from_data(question: str) -> str:
         except Exception:
             pass
 
-    # ------------------------------------------------------------------
-    # 6) TIME-OF-DAY PATTERNS
-    # ------------------------------------------------------------------
+
+    # 6 TIME-OF-DAY PATTERNS
+
     time_col = None
     if "crash_hour" in df.columns:
         time_col = "crash_hour"
@@ -221,10 +218,9 @@ def build_context_from_data(question: str) -> str:
                 f"Peak crash times (from '{time_col}'): " + "; ".join(time_lines)
             )
 
-    # ------------------------------------------------------------------
-    # 7) WEATHER & LIGHT CONDITIONS
-    # ------------------------------------------------------------------
-    # Prefer weather_new if it exists, else weather_conditions
+    # 7 WEATHER & LIGHT CONDITIONS
+
+
     weather_col = None
     if "weather_new" in df.columns:
         weather_col = "weather_new"
@@ -248,9 +244,9 @@ def build_context_from_data(question: str) -> str:
                 "Lighting conditions with most crashes: " + "; ".join(light_lines)
             )
 
-    # ------------------------------------------------------------------
-    # 8) COLLISION & ROAD CONFIGURATION TYPES
-    # ------------------------------------------------------------------
+
+    # 8 COLLISION & ROAD CONFIGURATION TYPES
+
     if "manner_of_collision" in df.columns:
         man_counts = df["manner_of_collision"].value_counts(dropna=True).head(4)
         if not man_counts.empty:
@@ -287,7 +283,6 @@ def build_context_from_data(question: str) -> str:
                 + "; ".join(tw_lines)
             )
 
-    # Linked road characteristics
     if "number_of_travel_lanes_linked_rd" in df.columns:
         try:
             lanes = pd.to_numeric(
@@ -332,9 +327,8 @@ def build_context_from_data(question: str) -> str:
                 "Urban location types at crash sites: " + "; ".join(ul_lines)
             )
 
-    # ------------------------------------------------------------------
-    # 9) STREETS, INTERSECTIONS & LANDMARKS
-    # ------------------------------------------------------------------
+    # 9 STREETS, INTERSECTIONS & LANDMARKS
+ 
     by_intersection = None
 
     if "roadway" in df.columns:
@@ -369,14 +363,13 @@ def build_context_from_data(question: str) -> str:
                 "Top nearby landmarks by crash count: " + "; ".join(lm_lines)
             )
 
-    # ------------------------------------------------------------------
-    # 10) QUESTION-AWARE FOCUS AREAS (CITY / ROAD / LANDMARK)
-    # ------------------------------------------------------------------
+    # 10 QUESTION-AWARE FOCUS AREAS (CITY/ROAD/LANDMARK)
+
     q_lower = question.lower()
     focus_snippets: list[str] = []
     HEAVY_THRESHOLD = 20
 
-    # Heuristic for "complex" question (more detailed comparisons)
+    #more detailed comparisons
     complex_question = (
         len(question) > 120
         or any(
@@ -385,14 +378,13 @@ def build_context_from_data(question: str) -> str:
         )
     )
 
-    # 10a) CITY-FOCUSED
+    # 10.1 CITY-FOCUSED
     if "city_town_name" in df.columns:
         city_series = df["city_town_name"].dropna().astype(str)
         unique_cities = city_series.unique()
 
         matching_cities = [c for c in unique_cities if c.lower() in q_lower]
 
-        # City comparison if multiple mentioned
         if complex_question and len(matching_cities) >= 2:
             comp_lines = []
             for c in matching_cities[:4]:
@@ -404,7 +396,6 @@ def build_context_from_data(question: str) -> str:
                     + "; ".join(comp_lines)
                 )
 
-        # Detailed snippets for up to 2 heavy cities
         for c in matching_cities[:2]:
             sub = df[df["city_town_name"] == c]
             if len(sub) < HEAVY_THRESHOLD:
@@ -412,7 +403,6 @@ def build_context_from_data(question: str) -> str:
 
             snippet = [f"In {c}, there are {len(sub)} crashes in the dataset."]
 
-            # Severity mix in that city
             if "crash_severity" in sub.columns:
                 city_sev = sub["crash_severity"].value_counts(dropna=True).head(3)
                 if not city_sev.empty:
@@ -421,7 +411,6 @@ def build_context_from_data(question: str) -> str:
                         "Crash severity mix there: " + "; ".join(sev_lines)
                     )
 
-            # Top streets in that city
             if "roadway" in sub.columns:
                 city_roads = sub["roadway"].value_counts(dropna=True).head(3)
                 if not city_roads.empty:
@@ -429,8 +418,7 @@ def build_context_from_data(question: str) -> str:
                     snippet.append(
                         "Top crash roadways there: " + "; ".join(r_lines)
                     )
-
-            # Weather in that city
+                    
             if weather_col and weather_col in sub.columns:
                 city_weather = sub[weather_col].value_counts(dropna=True).head(2)
                 if not city_weather.empty:
@@ -442,7 +430,7 @@ def build_context_from_data(question: str) -> str:
 
             focus_snippets.append(" ".join(snippet))
 
-    # 10b) ROAD-FOCUSED
+    # 10.2 ROAD-FOCUSED
     if "roadway" in df.columns:
         road_series = df["roadway"].dropna().astype(str)
         unique_roads = road_series.unique()
@@ -466,7 +454,6 @@ def build_context_from_data(question: str) -> str:
 
             snippet = [f"Along {road}, there are {len(sub)} crashes in the dataset."]
 
-            # Common cross streets
             if "near_intersection_roadway" in sub.columns:
                 cross = (
                     sub["near_intersection_roadway"]
@@ -482,7 +469,7 @@ def build_context_from_data(question: str) -> str:
                     cross_lines = [f"{n} ({c})" for n, c in cross.items()]
                     snippet.append("Top cross streets: " + "; ".join(cross_lines))
 
-            # Speed limits along that road
+
             if "speed_limit" in sub.columns:
                 try:
                     spd_sub = pd.to_numeric(
@@ -501,7 +488,7 @@ def build_context_from_data(question: str) -> str:
 
             focus_snippets.append(" ".join(snippet))
 
-    # 10c) LANDMARK-FOCUSED
+    # 10.3 LANDMARK-FOCUSED
     if "nearest_landmark" in df.columns:
         lm_series = df["nearest_landmark"].dropna().astype(str)
         unique_landmarks = lm_series.unique()
@@ -519,7 +506,6 @@ def build_context_from_data(question: str) -> str:
                 f"Near {lm}, there are {len(sub)} crashes in the dataset."
             ]
 
-            # Peak times near this landmark
             lm_time_col = None
             if "crash_hour" in sub.columns:
                 lm_time_col = "crash_hour"
@@ -534,8 +520,7 @@ def build_context_from_data(question: str) -> str:
                         "Peak crash times near this landmark: "
                         + "; ".join(time_lines)
                     )
-
-            # Weather near this landmark
+                    
             lm_weather_col = None
             if "weather_new" in sub.columns:
                 lm_weather_col = "weather_new"
@@ -559,9 +544,9 @@ def build_context_from_data(question: str) -> str:
             + "\n".join(focus_snippets)
         )
 
-    # ------------------------------------------------------------------
-    # 11) GUIDANCE FOR THE MODEL (HOW TO ANSWER)
-    # ------------------------------------------------------------------
+
+    # 11 GUIDANCE FOR THE MODEL
+    
     parts.append(
         "Use only the statistics and patterns summarized above when answering. "
         "You may describe trends, compare locations, highlight risky conditions "
@@ -570,16 +555,13 @@ def build_context_from_data(question: str) -> str:
         "user to at most three sentences, written as clear prose (no bullet lists)."
     )
 
-    # ------------------------------------------------------------------
-    # FINAL CONTEXT STRING
-    # ------------------------------------------------------------------
     context = "\n".join(parts)
     return context[:MAX_CONTEXT_CHARS]
 
 
-# ------------------------------------------------------------
-# /chat endpoint
-# ------------------------------------------------------------
+
+# chat endpoint
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     question = req.message.strip()
